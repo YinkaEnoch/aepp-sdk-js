@@ -14,16 +14,16 @@
  *  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  *  PERFORMANCE OF THIS SOFTWARE.
  */
-import { describe, it, before } from 'mocha'
 import { expect } from 'chai'
-import { BaseAe, getSdk, publicKey } from './'
-import { decode } from '../../src/tx/builder/helpers'
-import { DRY_RUN_ACCOUNT } from '../../src/tx/builder/schema'
+import { before, describe, it } from 'mocha'
 import * as R from 'ramda'
-import { randomName } from '../utils'
-import { decodeEvents, readType, SOPHIA_TYPES } from '../../src/contract/aci/transformation'
-import { messageToHash } from '../../src/utils/crypto'
 import { getFunctionACI } from '../../src/contract/aci/helpers'
+import { decodeEvents, readType, SOPHIA_TYPES } from '../../src/contract/aci/transformation'
+import { commitmentHash, decode } from '../../src/tx/builder/helpers'
+import { DRY_RUN_ACCOUNT } from '../../src/tx/builder/schema'
+import { messageToHash } from '../../src/utils/crypto'
+import { randomName } from '../utils'
+import { BaseAe, getSdk, publicKey } from './'
 
 const identityContract = `
 contract Identity =
@@ -215,12 +215,11 @@ describe('Contract', function () {
 
       // preclaim
       const { salt: _salt } = await contract.aensPreclaim(name)
-      // @TODO enable after next HF
-      // const commitmentId = commitmentHash(name, _salt)
+      const commitmentId = commitmentHash(name, _salt)
       const preclaimSig = await contract.delegateNamePreclaimSignature(contractAddress)
       console.log(`preclaimSig -> ${preclaimSig}`)
-      // const preclaim = await cInstance.methods.signedPreclaim(await contract.address(), commitmentId, preclaimSig)
-      // preclaim.result.returnType.should.be.equal('ok')
+      const preclaim = await cInstance.methods.signedPreclaim(await contract.address(), commitmentId, preclaimSig)
+      preclaim.result.returnType.should.be.equal('ok')
       await contract.awaitHeight((await contract.height()) + 2)
       // claim
       const claimSig = await contract.delegateNameClaimSignature(contractAddress, name)
