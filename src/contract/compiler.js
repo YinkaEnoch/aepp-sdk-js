@@ -89,6 +89,7 @@ export default AsyncInit.compose(ContractBase, {
       // In order to be able to use the encode / decode calldata we need to have
       // access to the contracts compiled abi.
       const aci = await this.contractGetACI(source);
+      console.log('aci', aci);
 
       // The encoder expects the aci to be passed as array, thus this weird flex :D
       const encoder = new Encoder([aci.encoded_aci]);
@@ -116,7 +117,7 @@ export default AsyncInit.compose(ContractBase, {
       })
       return bytecode
     },
-    contractGetACI (code, options) {
+    async contractGetACI (code, options) {
       this._ensureCompilerReady()
       return this._compilerApi.generateACI({ code, options: this._prepareCompilerOptions(options) })
     },
